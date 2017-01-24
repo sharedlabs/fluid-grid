@@ -1,0 +1,209 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-resizable-behavior/iron-resizable-behavior.html">
+
+<!--
+`fluid-grid`
+
+
+@demo demo/index.html 
+-->
+
+<dom-module id="fluid-grid">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+
+    <content></content>
+
+  </template>
+</dom-module>
+
+<script>
+(function() {
+  'use strict';
+
+  Polymer({
+
+    is: 'fluid-grid',
+
+    behaviors: [
+      Polymer.IronResizableBehavior
+    ],
+
+    properties: {
+
+      /**
+       * CSS selector of the items.
+       */
+      itemSelector: {
+        type: String,
+        value: '*'
+      },
+
+      /**
+       * CSS selector of the items parent. The default is this element.
+       */
+      containerSelector: {
+        type: String,
+        value: null
+      },
+
+      items: {
+        type: Array,
+        readOnly: true,
+        value: _ => []
+      },
+
+      minWidth: {
+        type: String,
+        value: '100px'
+      },
+
+      /**
+       * Any horizontal margin each item has.
+       */
+      marginWidth: {
+        type: String,
+        value: '0px'
+      },
+
+      /**
+       * If true the calculated height will be the same as the width.
+       */
+      autoHeight: {
+        type: Boolean,
+        value: false
+      },
+
+      /**
+       * Whether this element is visible or not so it can make size calculations.
+       */
+      visible: {
+        type: Boolean,
+        value: false
+      },
+
+      _calculatedWidth: {
+        type: Number,
+        observer: '_calculatedWidthChanged'
+      },
+
+      // Chrome is going to fix scrollBar width
+      _scrollbarWidth: {
+        type: Number,
+        value: 0
+      }
+
+    },
+
+    observers: [
+      '_visibleChanged(visible, isAttached)'
+    ],
+
+    attached() {
+      this._scrollbarWidth = this._getScrollBarWidth();
+      this._updateItems();
+
+      requestAnimationFrame(_ => {
+        this._observer = this._observeItems();
+        this.addEventListener('iron-resize', this._onIronResize.bind(this));
+      });
+    },
+
+    detached() {
+      if (this._observer) {
+        this._observer.disconnect();
+      }
+    },
+
+    updateSizes() {
+      const totalWidth = this.getBoundingClientRect().width - this._scrollbarWidth;
+      const minWidth = parseInt(this.minWidth);
+      const marginWidth = parseInt(this.marginWidth);
+
+      if (totalWidth <= minWidth) {
+        this._calculatedWidth = totalWidth - marginWidth;
+      } else {
+        this._calculatedWidth = Math.floor(totalWidth / Math.floor(totalWidth / minWidth) - marginWidth);
+      }
+    },
+
+    _observeItems() {
+      let target = this;
+
+      if (this.containerSelector) {
+        target = Polymer.dom(this).querySelectorAll(this.containerSelector)[0];
+      }
+
+      return new MutationObserver(mutations => {
+        this._updateItems();
+      }).observe(target, {childList: true, characterData: true});
+    },
+
+    _onIronResize() {
+      this.debounce('updateSizes', this.updateSizes.bind(this), 400);
+    },
+
+    _updateItems: function() {
+      var nodes = Polymer.dom(this).querySelectorAll(this.itemSelector);
+      this._setItems(nodes);
+      this._calculatedWidthChanged(this._calculatedWidth);
+    },
+
+    _calculatedWidthChanged(_calculatedWidth) {
+      if (this.items.length) {
+        for (let i = 0; i < this.items.length; i++) {
+          if (this.items[i].localName !== 'template') {
+            this.items[i].style.width = _calculatedWidth + 'px';
+            if (this.autoHeight) {
+              this.items[i].style.height = _calculatedWidth + 'px';
+            }
+          }
+        }
+      }
+    },
+
+    _visibleChanged(visible) {
+      if (visible) {
+        requestAnimationFrame(_ => {
+          this.updateSizes();
+        });
+      }
+    },
+
+    _getScrollBarWidth() {
+      const inner = document.createElement('p');
+      inner.style.width = "100%";
+      inner.style.height = "200px";
+
+      const outer = document.createElement('div');
+      outer.style.position = "absolute";
+      outer.style.top = "0px";
+      outer.style.left = "0px";
+      outer.style.visibility = "hidden";
+      outer.style.width = "200px";
+      outer.style.height = "150px";
+      outer.style.overflow = "hidden";
+      outer.appendChild (inner);
+
+      document.body.appendChild (outer);
+      const w1 = inner.offsetWidth;
+      outer.style.overflow = 'scroll';
+      let w2 = inner.offsetWidth;
+
+      if (w1 == w2) {
+        w2 = outer.clientWidth;
+      }
+
+      document.body.removeChild(outer);
+
+      return (w1 - w2) || 0;
+    }
+
+  });
+
+}());
+</script>
