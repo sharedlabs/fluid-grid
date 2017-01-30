@@ -105,9 +105,9 @@
 
     attached() {
       this._scrollbarWidth = this._getScrollBarWidth();
-      this._updateItems();
 
       requestAnimationFrame(_ => {
+        this._updateItems();
         this._observer = this._observeItems();
         this.addEventListener('iron-resize', this._onIronResize.bind(this));
       });
