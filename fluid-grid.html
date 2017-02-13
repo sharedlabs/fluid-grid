@@ -148,7 +148,6 @@
         }
 
         return new MutationObserver(mutations => {
-          console.log('updated')
           this._updateItems();
         }).observe(target, {childList: true, characterData: true});
       }
