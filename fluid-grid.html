@@ -23,83 +23,84 @@
 
       static get is() {return 'fluid-grid';}
 
-      static get config() {
+      static get properties() {
         return {
-          properties: {
-            /**
-             * CSS selector of the items.
-             */
-            itemSelector: {
-              type: String,
-              value: '*'
-            },
 
-            /**
-             * CSS selector of the items parent. The default is this element.
-             */
-            containerSelector: {
-              type: String,
-              value: null
-            },
-
-            items: {
-              type: Array,
-              readOnly: true,
-              value: _ => []
-            },
-
-            minWidth: {
-              type: String,
-              value: '100px'
-            },
-
-            /**
-             * Any horizontal margin each item has.
-             */
-            marginWidth: {
-              type: String,
-              value: '0px'
-            },
-
-            /**
-             * If true the calculated height will be the same as the width.
-             */
-            autoHeight: {
-              type: Boolean,
-              value: false
-            },
-
-            /**
-             * Whether this element is visible or not so it can make size calculations.
-             */
-            visible: {
-              type: Boolean,
-              value: false
-            },
-
-            _calculatedWidth: {
-              type: Number,
-              observer: '_calculatedWidthChanged'
-            },
-
-            // Chrome is going to fix scrollBar width
-            _scrollbarWidth: {
-              type: Number,
-              value: 0
-            },
-
-            _isAttached: {
-              type: Boolean,
-              value: false,
-            },
+          /**
+            * CSS selector of the items.
+            */
+          itemSelector: {
+            type: String,
+            value: '*'
           },
 
-          observers: [
-            '_visibleChanged(visible, _isAttached)'
-          ],
+          /**
+            * CSS selector of the items parent. The default is this element.
+            */
+          containerSelector: {
+            type: String,
+            value: null
+          },
+
+          items: {
+            type: Array,
+            readOnly: true,
+            value: _ => []
+          },
+
+          minWidth: {
+            type: String,
+            value: '100px'
+          },
+
+          /**
+            * Any horizontal margin each item has.
+            */
+          marginWidth: {
+            type: String,
+            value: '0px'
+          },
+
+          /**
+            * If true the calculated height will be the same as the width.
+            */
+          autoHeight: {
+            type: Boolean,
+            value: false
+          },
+
+          /**
+            * Whether this element is visible or not so it can make size calculations.
+            */
+          visible: {
+            type: Boolean,
+            value: false
+          },
+
+          _calculatedWidth: {
+            type: Number,
+            observer: '_calculatedWidthChanged'
+          },
+
+          // Chrome is going to fix scrollBar width
+          _scrollbarWidth: {
+            type: Number,
+            value: 0
+          },
+
+          _isAttached: {
+            type: Boolean,
+            value: false,
+          }
 
         };
       }
+
+      static get observers() {
+        return [
+          '_visibleChanged(visible, _isAttached)'
+        ];
+      } 
 
       constructor() {
         super();
